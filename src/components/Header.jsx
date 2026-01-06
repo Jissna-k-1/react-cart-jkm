@@ -2,12 +2,17 @@ import { faCartShopping, faHeart, faTruckFast } from '@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import { Nav,Container,Navbar,Badge } from 'react-bootstrap'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 
 
 
 function Header() {
+  const userWishlist = useSelector(state=>state.wishlistReducer)
+  const userCart = useSelector(state=>state.cartReducer)
+  // console.log(userWishlist);
+  
   return (
     <Navbar expand="lg" className="bg-primary position-fixed w-100">
       <Container>
@@ -18,12 +23,12 @@ function Header() {
 
           <Nav className="ms-auto d-md-flex justify-content-center align-items-md-center"/>
 
-            <Nav> <Link to={'/wishlist'} className='text-decoration-none text-light fw-bold d-flex align-items-center'> <FontAwesomeIcon icon={faHeart} className='text-danger'/> WISHLIST <Badge pill bg="dark" className='ms-1'>9</Badge> </Link>
+            <Nav> <Link to={'/wishlist'} className='text-decoration-none text-light fw-bold d-flex align-items-center'> <FontAwesomeIcon icon={faHeart} className='text-danger'/> WISHLIST <Badge pill bg="dark" className='ms-1'>{userWishlist?.length}</Badge> </Link>
             <Nav> <Link to={'/cart'} className='text-decoration-none text-light fw-bold ms-md-5 d-flex align-items-center'> <FontAwesomeIcon icon={faCartShopping} className='text-success me-1'/> CART 
-            <Badge pill bg="dark" className='ms-1' >20</Badge> </Link>
+            <Badge pill bg="dark" className='ms-1' >{userCart?.length}</Badge> </Link>
             </Nav>
 
-            <Nav.Link href="#link">Link</Nav.Link>
+            {/* <Nav.Link href="#link">Link</Nav.Link> */}
           
           </Nav>
         </Navbar.Collapse>
