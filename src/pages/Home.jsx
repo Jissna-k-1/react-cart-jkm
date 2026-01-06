@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import {Card} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { getAllProducts } from '../redux/slice/productSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
 
 
 function Home() {
@@ -11,14 +13,33 @@ function Home() {
 const {loading,allProducts,error} = useSelector(state=>state.productReducer)
 // console.log(allProducts);
 
+const [currentPage,setCurrentPage] = useState(1)
+const productsPerPage = 8
+const totalPages = Math.ceil(allProducts.length/ productsPerPage)
+
+const pageItemLastIndex = currentPage * productsPerPage
+const pageItemStartIndex = pageItemLastIndex - productsPerPage
+const visibleProductsArray = allProducts?.slice(pageItemStartIndex,pageItemLastIndex)
+
   useEffect(()=>{
     dispatch(getAllProducts())
   },[])
 
+const navigateNextPage = ()=>{
+  if(currentPage!=totalPages){
+    setCurrentPage(currentPage+1)
+  }
+}
+
+const navigatePreviousPage = ()=>{
+  if(currentPage!=1){
+    setCurrentPage(currentPage-1)
+  }
+}
 
   return (
     <>
-         <Header/>
+         <Header insideHome={true} />
 
  <div className='container py-5'>
   {
@@ -27,26 +48,31 @@ const {loading,allProducts,error} = useSelector(state=>state.productReducer)
       <img src="https://media3.giphy.com/media/v1.Y2lkPTZjMDliOTUyYWRmMWdmcWplMndvZ2M4ODVwbXQyeWw0Zm5maHQ1eGZwajM3cmJ5MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oEjI6SIIHBdRxXI40/200.gif" alt="" />
       loading....</div>
       :
-       <div className="row my-5">
-{/* duplicate */}
-{
-  allProducts?.length>0?
-  allProducts?.map(product=>(
-    <div key={product?.id} className="col-md-3 mb-2">
+      <div className="row my-5">
+       {/* duplicate */}
+        {
+          allProducts?.length>0?
+          visibleProductsArray?.map(product=>(
+          <div key={product?.id} className="col-md-3 mb-2">
+            <Card >
+             <Card.Img height={'250px'} className='p-3' variant="top" src={product?.thumbnail} />
+             <Card.Body className='text-center'>
+              <Card.Title> {product?.title}</Card.Title>
+              <Link to={`/products/${product?.id}/view`} className='btn btn-secondary'> View More...</Link>
+             </Card.Body>
+           </Card>
+         </div>
+         ))
+          :
+         <p className='fs-5 fw-bold my-5'>product not found!!!</p>
+        }
 
-      <Card >
-      <Card.Img height={'250px'} className='p-3' variant="top" src={product?.thumbnail} />
-      <Card.Body className='text-center'>
-        <Card.Title> {product?.title}</Card.Title>
-        <Link to={`/products/${product?.id}/view`} className='btn btn-secondary'> View More...</Link>
-      </Card.Body>
-    </Card>
-</div>
-  ))
-  :
-  <p className='fs-5 fw-bold my-5'>product not found!!!</p>
-}
-  </div>
+          <div className="my-3 text-center">
+            <button onClick={navigatePreviousPage} className='btn'> <FontAwesomeIcon icon={faBackward}/></button>
+            <span className='fw-bolder'> {currentPage} of {totalPages} </span>
+            <button onClick={navigateNextPage} className='btn'> <FontAwesomeIcon icon={faForward}/></button>
+          </div>
+     </div>
   }
  
  </div>

@@ -2,15 +2,17 @@ import { faCartShopping, faHeart, faTruckFast } from '@fortawesome/free-solid-sv
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import { Nav,Container,Navbar,Badge } from 'react-bootstrap'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { searchProduct } from '../redux/slice/productSlice'
 
 
 
 
-function Header() {
+function Header({insideHome}) {
   const userWishlist = useSelector(state=>state.wishlistReducer)
   const userCart = useSelector(state=>state.cartReducer)
+  const dispatch = useDispatch()
   // console.log(userWishlist);
   
   return (
@@ -22,7 +24,11 @@ function Header() {
         <Navbar.Collapse id="basic-navbar-nav">
 
           <Nav className="ms-auto d-md-flex justify-content-center align-items-md-center"/>
-
+          { insideHome &&
+           <Nav.Item className='me-lg-2'>
+            <input onChange={e=>dispatch(searchProduct(e.target.value))} className='form-control me-lg-5' placeholder='Search by Product Name' type="text" />
+           </Nav.Item>
+          }
             <Nav> <Link to={'/wishlist'} className='text-decoration-none text-light fw-bold d-flex align-items-center'> <FontAwesomeIcon icon={faHeart} className='text-danger'/> WISHLIST <Badge pill bg="dark" className='ms-1'>{userWishlist?.length}</Badge> </Link>
             <Nav> <Link to={'/cart'} className='text-decoration-none text-light fw-bold ms-md-5 d-flex align-items-center'> <FontAwesomeIcon icon={faCartShopping} className='text-success me-1'/> CART 
             <Badge pill bg="dark" className='ms-1' >{userCart?.length}</Badge> </Link>

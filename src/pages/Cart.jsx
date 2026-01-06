@@ -1,14 +1,52 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useNavigate } from 'react-router-dom'
+import { decrementCartItem, emptyCart, incrementCartItem, removeCartItem } from '../redux/slice/cartSlice'
+import Swal from 'sweetalert2'
+
+
 
 function Cart() {
+  const userCart = useSelector(state=>state.cartReducer)
+  const [sum,setSum] = useState(0)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  useEffect(()=>{
+  setSum(userCart?.reduce((acc,curr)=>acc+curr.totalPrice,0))    
+  },[userCart])
+
+const handleDecrementCart = (product)=>{
+  if(product.quantity>1){
+  //  decrement
+  dispatch(decrementCartItem(product))
+  }else{
+  // remove
+  dispatch(removeCartItem(product.id))
+  }
+}
+
+const checkOut =()=>{
+  dispatch(emptyCart())
+  navigate('/')
+  Swal.fire({
+    title:"Order Placed",
+    text:"Thankyou for Purchasing with us",
+    icon:"success",
+    confirmButtonText:"OK"
+
+  })
+}
   return (
     <>
     <Header/>
       <div className="container py-5">
-        <div className="my-5">
+       {
+        userCart?.length>0 ?
+         <div className="my-5">
           <h1 className='text-danger fw-bold'>Cart Summary</h1>
           <div className="row mt-5">
             <div className="col-md-8 border rounded p-5">
@@ -24,36 +62,51 @@ function Cart() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>title</td>
-                  <td><img width={'50px'} src="https://m.media-amazon.com/images/I/61vuiK6d7RL.jpg" alt="product" /></td>
+                {
+                  userCart?.map((product,index)=>(
+                    <tr>
+                  <td>{index+1}</td>
+                  <td>{product?.title}</td>
+                  <td><img width={'50px'} src={product?.thumbnail} alt="product" /></td>
                   <td>
                     <div className="d-flex">
-                      <button className='btn fs-3 fw-bold'>-</button>
-                      <input style={{width:'50px'}} value={10} type="text" className='form-control' readOnly />
-                      <button className='btn fs-4 fw-bold'>+</button>
+                      <button onClick={()=>handleDecrementCart(product)} className='btn fs-3 fw-bold'>-</button>
+                      <input style={{width:'50px'}} value={product?.quantity} type="text" className='form-control' readOnly />
+                      <button onClick={()=>dispatch(incrementCartItem(product))} className='btn fs-4 fw-bold'>+</button>
                     </div>
                   </td>
-                  <td>$ 200</td>
-                  <td> <button className='btn text-danger'><FontAwesomeIcon icon={faTrash}/>  </button> </td>
+                  <td>$ {product?.totalPrice}</td>
+                  <td> <button onClick={()=>dispatch(removeCartItem(product?.id))} className='btn text-danger'><FontAwesomeIcon icon={faTrash}/>  </button> </td>
                 </tr>
+                  ))
+                }
               </tbody>
              </table>
+             <div className="float-end my-3 ">
+              <button onClick={()=>dispatch(emptyCart())} className="btn btn-danger me-2">EMPTY CART</button>
+              <Link to={'/'} className="btn btn-primary">SHOP MORE</Link>
+             </div>
             </div>
 
             <div className="col-md-4">
              <div className="border rounded p-5">
-                <h3 className='fw-bold'>Total Amount : <span className='text-danger'>$19.99</span></h3>
+                <h3 className='fw-bold fs-5'>Total Amount : <span className='text-danger'>$ {sum}</span></h3>
                 <hr />
                 <div className="d-grid mt-2">
-                  <button className='btn btn-success'>CHECK OUT</button>
+                  <button onClick={checkOut} className='btn btn-success'>CHECK OUT</button>
                 </div>
               </div>
             </div>
 
           </div>
         </div>
+        :
+         <div style={{height:'100vh'}} className='d-flex justify-content-center align-items-center flex-column'>
+        <img  width={'130px'}  src="https://cdn-icons-png.flaticon.com/512/628/628627.png" alt="empty cart" />
+        <h3 style={{marginTop:'13px'}}>Cart is Empty</h3>
+        <Link to={'/'} className='btn btn-primary mt-2'>Add More</Link>
+      </div>
+       }
       </div>
     </>
   )
